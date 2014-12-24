@@ -7,6 +7,7 @@
 
 #undef EX
 #define EX(element) execute_data->element
+#define EX_T(offset) (*EX_TMP_VAR(execute_data, offset))
 
 #define USE_OPLINE zend_op *opline = EX(opline);
 #define OPLINE EX(opline)
@@ -51,6 +52,18 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(const zend_execute_dat
 		return *_get_zval_cv_lookup_BP_VAR_W(ptr, var TSRMLS_CC);
 	}
 	return **ptr;
+}
+
+static zend_always_inline zval *_get_zval_ptr_tmp(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
+{
+	return should_free->var = &EX_T(var).tmp_var;
+}
+
+static zend_always_inline zval *_get_zval_ptr_var(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
+{
+	zval *ptr = EX_T(var).var.ptr;
+
+	return should_free->var = ptr;
 }
 
 

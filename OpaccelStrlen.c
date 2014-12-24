@@ -135,4 +135,20 @@ static int ZEND_FASTCALL OPACCEL_STRLEN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL OPACCEL_STRLEN_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS) {
+	USE_OPLINE
+	temp_variable *retval;
+	zval *arg;
+	zend_free_op free;
+
+	retval = EX_TMP_VAR(execute_data, opline->result.var);
+	arg = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free);
+
+	OpaccelStrlen(arg, retval);
+
+	zval_ptr_dtor(&free.var);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 #endif

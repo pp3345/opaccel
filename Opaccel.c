@@ -2,21 +2,7 @@
 #include "Opaccel.h"
 #include "OpaccelEmptyOpcodeHandlerArray.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(opaccel);
 ZEND_EXTENSION();
-
-zend_module_entry opaccel_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"opaccel",
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	"devel",
-	STANDARD_MODULE_PROPERTIES
-};
 
 #include "OpaccelStrlen.c"
 
@@ -28,6 +14,7 @@ static int OpaccelStartup(zend_extension *extension) {
 
 #ifdef HAVE_OPACCEL_STRLEN
 	handlers[5773] = OPACCEL_STRLEN_SPEC_CV_HANDLER;
+	handlers[5758] = OPACCEL_STRLEN_SPEC_TMP_VAR_HANDLER;
 #endif
 
 	zend_opcode_handlers = (opcode_handler_t*) handlers;
@@ -42,9 +29,8 @@ static void OpaccelCompile(zend_op_array *array) {
 	for(op = array->opcodes; op < array->opcodes + array->last; op++) {
 		switch(op->opcode) {
 			case ZEND_SEND_VAR:
-				if(op->op1_type == IS_CV /* ZEND_SEND_VAR_SPEC_CV */
-						&& (op + 1)->opcode == ZEND_DO_FCALL
-						&& (op + 1)->op1_type == IS_CONST /* ZEND_DO_FCALL_SPEC_CONST */) {
+			case ZEND_SEND_VAL:
+				if((op + 1)->opcode == ZEND_DO_FCALL) {
 
 #ifdef HAVE_OPACCEL_STRLEN
 					if(Z_STRLEN(array->literals[(op + 1)->op1.constant].constant) == sizeof("strlen") - 1

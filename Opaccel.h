@@ -16,21 +16,6 @@
 #include "Zend/zend_globals_macros.h"
 #include "Zend/zend_modules.h"
 
-extern zend_module_entry opaccel_module_entry;
-#define phpext_opaccel_ptr &opaccel_module_entry
-
-#ifdef ZTS
-#define OPACCEL_GLOBALS(v) TSRMG(opaccel_globals_id, zend_opaccel_globals *, v)
-#else
-#define OPACCEL_GLOBALS(v) (opaccel_globals.v)
-#endif
-
-ZEND_BEGIN_MODULE_GLOBALS(opaccel)
-ZEND_END_MODULE_GLOBALS(opaccel)
-extern ZEND_DECLARE_MODULE_GLOBALS(opaccel);
-
-PHP_MINIT_FUNCTION(opaccel);
-
 #ifndef ZEND_EXT_API
 # if defined(__GNUC__) && __GNUC__ >= 4
 #  define ZEND_EXT_API __attribute__ ((visibility("default")))
