@@ -11,7 +11,7 @@ PHP_ARG_ENABLE(opaccel-useless-call-optimization, enable optimization of useless
 [  --disable-opaccel-useless-call-optimization    Disable opaccel optimization of useless calls], yes)
 
 if test "$PHP_OPACCEL" != "no"; then
-  PHP_NEW_EXTENSION(opaccel, Opaccel.c, $ext_shared)
+  PHP_NEW_EXTENSION(opaccel, Opaccel.c, $ext_shared,,,,yes)
   
   if test "$PHP_OPACCEL_STRLEN" != "no"; then
   	AC_DEFINE([HAVE_OPACCEL_STRLEN], [], [Enable opaccel strlen])
