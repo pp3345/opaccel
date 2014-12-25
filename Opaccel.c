@@ -15,6 +15,7 @@ static int OpaccelStartup(zend_extension *extension) {
 #ifdef HAVE_OPACCEL_STRLEN
 	handlers[5773] = OPACCEL_STRLEN_SPEC_CV_HANDLER;
 	handlers[5758] = OPACCEL_STRLEN_SPEC_TMP_VAR_HANDLER;
+	handlers[5763] = OPACCEL_STRLEN_SPEC_VAR_HANDLER;
 #endif
 
 	zend_opcode_handlers = (opcode_handler_t*) handlers;
@@ -30,6 +31,7 @@ static void OpaccelCompile(zend_op_array *array) {
 		switch(op->opcode) {
 			case ZEND_SEND_VAR:
 			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAR_NO_REF:
 				if((op + 1)->opcode == ZEND_DO_FCALL) {
 
 #ifdef HAVE_OPACCEL_STRLEN
