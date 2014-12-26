@@ -18,11 +18,9 @@ static int OpaccelStartup(zend_extension *extension) {
 
 	memcpy(handlers, zend_opcode_handlers, 168 * 25 * sizeof(opcode_handler_t));
 
-#ifdef HAVE_OPACCEL_STRLEN
-	handlers[5773] = OPACCEL_STRLEN_SPEC_CV_HANDLER;
-	handlers[5758] = OPACCEL_STRLEN_SPEC_TMP_VAR_HANDLER;
-	handlers[5763] = OPACCEL_STRLEN_SPEC_VAR_HANDLER;
-#endif
+	handlers[OPACCEL_STRLEN * 25 + _CV_CODE * 5 + _UNUSED_CODE] = OPACCEL_STRLEN_SPEC_CV_HANDLER;
+	handlers[OPACCEL_STRLEN * 25 + _TMP_CODE * 5 + _UNUSED_CODE] = OPACCEL_STRLEN_SPEC_TMP_VAR_HANDLER;
+	handlers[OPACCEL_STRLEN * 25 + _VAR_CODE * 5 + _UNUSED_CODE] = OPACCEL_STRLEN_SPEC_VAR_HANDLER;
 
 	zend_opcode_handlers = (opcode_handler_t*) handlers;
 
