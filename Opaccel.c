@@ -4,6 +4,12 @@
 
 ZEND_EXTENSION();
 
+ZEND_DECLARE_MODULE_GLOBALS(opaccel)
+
+ZEND_INI_BEGIN()
+	STD_ZEND_INI_ENTRY("opaccel.optimizations", "0xffffffff", PHP_INI_ALL, OnUpdateLongGEZero, optimizations, zend_opaccel_globals, opaccel_globals)
+ZEND_INI_END()
+
 #include "OpaccelStrlen.c"
 
 static int OpaccelStartup(zend_extension *extension) {
@@ -20,7 +26,22 @@ static int OpaccelStartup(zend_extension *extension) {
 
 	zend_opcode_handlers = (opcode_handler_t*) handlers;
 
+	if(zend_startup_module(&opaccel_module_entry) != SUCCESS)
+		return FAILURE;
+
 	return SUCCESS;
+}
+
+ZEND_MINIT_FUNCTION(opaccel) {
+	REGISTER_INI_ENTRIES();
+
+	return 1;
+}
+
+ZEND_MSHUTDOWN_FUNCTION(opaccel) {
+	UNREGISTER_INI_ENTRIES();
+
+	return 1;
 }
 
 static void OpaccelCompile(zend_op_array *array) {
@@ -34,9 +55,11 @@ static void OpaccelCompile(zend_op_array *array) {
 			case ZEND_SEND_VAR_NO_REF:
 				if((op + 1)->opcode == ZEND_DO_FCALL) {
 
-#ifdef HAVE_OPACCEL_STRLEN
 					if(Z_STRLEN(array->literals[(op + 1)->op1.constant].constant) == sizeof("strlen") - 1
 						&& !memcmp(Z_STRVAL(array->literals[(op + 1)->op1.constant].constant), "strlen", sizeof("strlen") - 1)) {
+						if(UNEXPECTED(!(OPAG(optimizations) & OPACCEL_OPTIMIZE_STRLEN)))
+							break;
+
 						if(UNEXPECTED(!RETURN_VALUE_USED(op + 1))) {
 							// Call is useless, optimize away
 							OpaccelMakeNOP(op);
@@ -46,8 +69,7 @@ static void OpaccelCompile(zend_op_array *array) {
 
 						op->opcode = OPACCEL_STRLEN;
 					} else
-#endif
-					break;
+						break;
 
 					op->result_type = (op + 1)->result_type;
 					op->result.var = (op + 1)->result.var;
@@ -77,4 +99,17 @@ zend_extension zend_extension_entry = {
 	NULL,
 	NULL,
 	STANDARD_ZEND_EXTENSION_PROPERTIES
+};
+
+zend_module_entry opaccel_module_entry = {
+        STANDARD_MODULE_HEADER,
+        "opaccel",
+        NULL,
+        ZEND_MINIT(opaccel),
+        ZEND_MSHUTDOWN(opaccel),
+        NULL,
+        NULL,
+        NULL,
+        "devel",
+        STANDARD_MODULE_PROPERTIES
 };

@@ -1,5 +1,7 @@
 --TEST--
 strlen() with array argument
+--INI--
+opaccel.optimizations=1
 --SKIPIF--
 <?php require_once 'skipif.inc';
 ?>

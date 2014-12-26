@@ -1,8 +1,6 @@
 
 #include "Opaccel.h"
 
-#ifdef HAVE_OPACCEL_STRLEN
-
 #include "OpaccelZendDependencies.c"
 
 static void OpaccelStrlen(zval *string, temp_variable *retval) {
@@ -166,5 +164,3 @@ static int ZEND_FASTCALL OPACCEL_STRLEN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	ZEND_VM_NEXT_OPCODE();
 }
-
-#endif
