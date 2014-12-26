@@ -54,10 +54,10 @@ static void OpaccelCompile(zend_op_array *array) {
 			case ZEND_SEND_VAL:
 			case ZEND_SEND_VAR_NO_REF:
 				if((op + 1)->opcode == ZEND_DO_FCALL) {
-
 					if(Z_STRLEN(array->literals[(op + 1)->op1.constant].constant) == sizeof("strlen") - 1
 						&& !memcmp(Z_STRVAL(array->literals[(op + 1)->op1.constant].constant), "strlen", sizeof("strlen") - 1)) {
-						if(UNEXPECTED(!(OPAG(optimizations) & OPACCEL_OPTIMIZE_STRLEN)))
+						if(UNEXPECTED(!(OPAG(optimizations) & OPACCEL_OPTIMIZE_STRLEN)
+							|| (op->op1_type == IS_CONST)))
 							break;
 
 						if(UNEXPECTED(!RETURN_VALUE_USED(op + 1))) {
