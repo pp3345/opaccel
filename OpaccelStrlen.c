@@ -126,7 +126,7 @@ static int ZEND_FASTCALL OPACCEL_STRLEN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	zval *cv;
 
 	retval = EX_TMP_VAR(execute_data, opline->result.var);
-	cv = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var);
+	cv = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 
 	OpaccelStrlen(cv, retval);
 

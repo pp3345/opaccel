@@ -25,31 +25,34 @@
 	ZEND_VM_INC_OPCODE(); \
 	ZEND_VM_CONTINUE()
 
+#define _CONST_CODE  0
+#define _TMP_CODE    1
+#define _VAR_CODE    2
+#define _UNUSED_CODE 3
+#define _CV_CODE     4
+
 #define CV_DEF_OF(i) (EG(active_op_array)->vars[i])
 
 #define RETURN_VALUE_USED(opline) (!((opline)->result_type & EXT_TYPE_UNUSED))
 
-static zend_never_inline zval **_get_zval_cv_lookup_BP_VAR_W(zval ***ptr, zend_uint var TSRMLS_DC)
+static zend_never_inline zval **_get_zval_cv_lookup_BP_VAR_R(zval ***ptr, zend_uint var TSRMLS_DC)
 {
 	zend_compiled_variable *cv = &CV_DEF_OF(var);
 
-	if (!EG(active_symbol_table)) {
-		Z_ADDREF(EG(uninitialized_zval));
-		*ptr = (zval**)EX_CV_NUM(EG(current_execute_data), EG(active_op_array)->last_var + var);
-		**ptr = &EG(uninitialized_zval);
-	} else if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
-		Z_ADDREF(EG(uninitialized_zval));
-		zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &EG(uninitialized_zval_ptr), sizeof(zval *), (void **)ptr);
+	if (!EG(active_symbol_table) ||
+	    zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
+		zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
+		return &EG(uninitialized_zval_ptr);
 	}
 	return *ptr;
 }
 
-static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
+static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_R(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
 {
 	zval ***ptr = EX_CV_NUM(execute_data, var);
 
 	if (UNEXPECTED(*ptr == NULL)) {
-		return *_get_zval_cv_lookup_BP_VAR_W(ptr, var TSRMLS_CC);
+		return *_get_zval_cv_lookup_BP_VAR_R(ptr, var TSRMLS_CC);
 	}
 	return **ptr;
 }
